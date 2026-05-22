@@ -24,6 +24,25 @@ AgentLens closes the gap by sitting between the agent runtime and Splunk. One pi
 
 ---
 
+---
+
+## Live Dashboard
+
+After running the WanderBot demo with all five attack scenarios, the AgentLens dashboard surfaces both detection layers working on real data:
+
+<img width="1791" height="908" alt="Image" src="https://github.com/user-attachments/assets/a5aef6f5-5ef2-490b-9752-f4e22df0f061" />
+
+**Layer 1 (top-left, Prompt Injection Alerts):** TF-IDF + GradientBoostingClassifier flags 50 prompts containing embedded injection patterns across 499 total events.
+
+**Layer 2 (top-right, Anomaly Score Over Time):** DensityFunction trained on token-usage distribution catches statistical outliers the classifier misses — specifically the cost-runaway attack that produced 1500+ token responses.
+
+<img width="1766" height="916" alt="Image" src="https://github.com/user-attachments/assets/322f0033-9a2d-4f9d-b43a-5a21272836de" />
+
+**Defense-in-depth scoreboard:** 499 total events monitored, 50 injections detected by Layer 1, 2 anomalies caught by Layer 2 (including the cost-runaway agent loop that consumed 29,357 tokens). The Top Agent Flows chart shows ten distinct CrewAI execution nodes, giving SRE teams visibility into agent reasoning paths.
+
+The dashboard updates in real-time as new events arrive via Splunk HEC. No restart, no config changes — install the AgentLens Splunk app and the panels populate from `index=agentlens`.
+
+
 ## Architecture
 
 <img width="4438" height="8192" alt="Image" src="https://github.com/user-attachments/assets/296dbc80-7475-4b4f-a394-a71667c91999" />
