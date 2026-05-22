@@ -24,8 +24,6 @@ AgentLens closes the gap by sitting between the agent runtime and Splunk. One pi
 
 ---
 
----
-
 ## The Solution
 
 AgentLens is a two-part system that turns Splunk into a live observability platform for agentic AI:
