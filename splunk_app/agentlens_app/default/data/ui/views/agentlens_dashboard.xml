@@ -1,0 +1,151 @@
+<dashboard version="1.1" theme="dark">
+  <label>AgentLens - LLM Observability</label>
+  <description>Real-time monitoring of CrewAI and LangGraph agents with Splunk ML-powered prompt injection and anomaly detection.</description>
+
+  <row>
+    <panel>
+      <title>Live Agent Activity (Last 24h)</title>
+      <chart>
+        <search>
+          <query>index=agentlens earliest=-24h | timechart span=15m count by service_name</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Event Count</option>
+        <option name="charting.backgroundColor">0x1a1a2e</option>
+        <option name="charting.foregroundColor">0xffffff</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Prompt Injection Alerts (Last 24h)</title>
+      <table>
+        <search>
+          <query>index=agentlens name=ChatCompletion earliest=-24h | eval prompt_text=coalesce('attributes.llm.input_messages.1.message.content', "") | where prompt_text!="" | apply agentlens_tfidf_vectorizer | apply agentlens_prompt_injection_classifier | where 'predicted(label)'=1 | eval model='attributes.model' | table _time service_name model prompt_text | sort -_time</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="rowNumbers">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+
+    <panel>
+      <title>Anomaly Score Over Time</title>
+      <chart>
+        <search>
+          <query>index=agentlens name=ChatCompletion earliest=-24h | eval tokens_total='attributes.tokens_total' | where isnotnull(tokens_total) AND tokens_total>0 | apply agentlens_density_tokens | timechart span=15m avg('IsOutlier(tokens_total)') as anomaly_rate</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.axisTitleY.text">Anomaly Rate</option>
+        <option name="charting.backgroundColor">0x1a1a2e</option>
+        <option name="charting.foregroundColor">0xffffff</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Token Usage Trend (Last 24h)</title>
+      <chart>
+        <search>
+          <query>index=agentlens name=ChatCompletion earliest=-24h | eval tokens_total='attributes.tokens_total' | where isnotnull(tokens_total) | timechart span=15m sum(tokens_total) as tokens | eval cost_usd=round(tokens*0.000003, 4)</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.axisTitleY.text">Tokens / Cost (USD)</option>
+        <option name="charting.backgroundColor">0x1a1a2e</option>
+        <option name="charting.foregroundColor">0xffffff</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Agents - Total Events</title>
+      <single>
+        <search>
+          <query>index=agentlens earliest=-24h | stats count</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xf1813f","0xdc4e41"]</option>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Injections Detected (24h)</title>
+      <single>
+        <search>
+          <query>index=agentlens name=ChatCompletion earliest=-24h | eval prompt_text=coalesce('attributes.llm.input_messages.1.message.content', "") | where prompt_text!="" | apply agentlens_tfidf_vectorizer | apply agentlens_prompt_injection_classifier | where 'predicted(label)'=1 | stats count</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="useColors">1</option>
+        <option name="rangeValues">[0,1]</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Anomalies Detected (24h)</title>
+      <single>
+        <search>
+          <query>index=agentlens name=ChatCompletion earliest=-24h | eval tokens_total='attributes.tokens_total' | where isnotnull(tokens_total) AND tokens_total>0 | apply agentlens_density_tokens | where 'IsOutlier(tokens_total)'=1 | stats count</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="useColors">1</option>
+        <option name="rangeValues">[0,1]</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Total Tokens (24h)</title>
+      <single>
+        <search>
+          <query>index=agentlens name=ChatCompletion earliest=-24h | eval tokens_total='attributes.tokens_total' | where isnotnull(tokens_total) | stats sum(tokens_total) as total</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorMode">none</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Top Agent Flows (Last 24h)</title>
+      <chart>
+        <search>
+          <query>index=agentlens earliest=-24h | eval flow_node='attributes.flow.node.name' | where isnotnull(flow_node) | stats count by flow_node | sort -count | head 10</query>
+          <earliest>-24h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisTitleX.text">Flow Node</option>
+        <option name="charting.axisTitleY.text">Call Count</option>
+        <option name="charting.backgroundColor">0x1a1a2e</option>
+        <option name="charting.foregroundColor">0xffffff</option>
+      </chart>
+    </panel>
+  </row>
+
+</dashboard>
