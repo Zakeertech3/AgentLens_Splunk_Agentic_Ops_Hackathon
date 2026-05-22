@@ -274,6 +274,40 @@ All config is loaded from `.env` via `pydantic_settings`:
 
 ---
 
+## Roadmap
+
+AgentLens v0.1.0 ships the foundational layers. The following are planned for future releases and were intentionally descoped from the hackathon submission to keep the demo focused and reliable:
+
+### v0.2.0 — Forecasting & Predictive Alerts
+- StateSpaceForecast integration for 24-hour token cost projection with 95% confidence intervals
+- LocalOutlierFactor as a third detection layer for multi-dimensional behavior outliers
+- Per-agent cost budgets with automatic throttling when forecast exceeds threshold
+
+### v0.3.0 — MCP Server Integration
+- Autonomous alert agent powered by Splunk MCP Server
+- Self-tuning detection thresholds based on observed traffic patterns
+- Auto-generated incident reports from grouped alerts
+
+### v0.4.0 — Expanded Framework Support
+- OpenAI Agents SDK auto-instrumentation
+- Anthropic Claude SDK auto-instrumentation
+- AutoGen and Pydantic AI support
+- Standalone instrumentation for raw LLM API calls without an agent framework
+
+### v0.5.0 — Hallucination Detection
+- LLM-as-judge pattern using Splunk-hosted gpt-oss-20b for response verification
+- Citation grounding checks against tool outputs
+- Confidence scoring per response
+
+### v1.0.0 — Production Hardening
+- Async HEC exporter for high-throughput environments
+- Retry queue with exponential backoff
+- Persistent buffer for offline-then-online scenarios
+- Comprehensive test suite with mocked Splunk
+- PyPI publication and Splunkbase certification
+
+---
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
