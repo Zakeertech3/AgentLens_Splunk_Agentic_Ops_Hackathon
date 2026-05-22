@@ -26,6 +26,45 @@ AgentLens closes the gap by sitting between the agent runtime and Splunk. One pi
 
 ---
 
+## The Solution
+
+AgentLens is a two-part system that turns Splunk into a live observability platform for agentic AI:
+
+### Part 1 — The Python SDK (the live link)
+
+A single line of code wires any CrewAI or LangGraph application into Splunk:
+
+```python
+import agentlens
+agentlens.instrument(service_name="my-agent")
+```
+
+After this call, every LLM invocation, tool call, and agent reasoning step from CrewAI or LangGraph is automatically captured as an OpenTelemetry span and streamed to Splunk via HTTP Event Collector. No manual logging, no schema design, no proxy server. The SDK uses [OpenInference](https://github.com/Arize-ai/openinference) instrumentors as the standard semantic layer, ensuring the data captured matches what the broader observability ecosystem expects.
+
+### Part 2 — The Splunk Detection App
+
+A packaged Splunk app (`agentlens_app.spl`) installs as a normal Splunk application and provides:
+
+- **Layer 1 detection** — A TF-IDF vectorizer + GradientBoostingClassifier trained on 550 labeled prompts (including embedded-injection patterns wrapped in realistic CrewAI task contexts) catches prompt injection attempts in real-time. The classifier runs as a saved search every 5 minutes against new events.
+
+- **Layer 2 detection** — A DensityFunction model trained on the distribution of LLM token usage flags statistical anomalies. This catches attacks the classifier misses, like cost-runaway loops where an agent gets manipulated into burning thousands of tokens on a single request.
+
+- **A live 7-panel dashboard** — Built with Splunk Dashboard Studio, the dashboard shows total events, both detection layer counters, agent activity timeline, anomaly score trends, token usage with estimated cost, and a breakdown of agent execution flow nodes.
+
+### How the Two Parts Work Together
+
+The data flow runs continuously and automatically:
+
+Once the one-time setup is complete (train models, install app, configure HEC token), the entire pipeline runs without manual intervention. Run a WanderBot booking, the dashboard updates within seconds. Run an attack scenario, the relevant detection panel shows the alert before the agent finishes its task.
+
+### What Makes This Different
+
+Most LLM observability tools (LangSmith, Helicone, Langfuse) are SaaS-only and require sending your prompts to a third-party service. AgentLens runs entirely in your Splunk instance — on-prem, air-gapped, or cloud — and uses Splunk's existing role-based access controls, retention policies, and alerting infrastructure. For regulated industries (finance, healthcare, government), this is the difference between "we can use this" and "compliance vetoed it."
+
+It also uses **classical ML algorithms native to Splunk** (TFIDF, GradientBoosting, DensityFunction) rather than calling external LLMs to judge LLMs. This means detection runs deterministically, costs nothing per request, and survives offline.
+
+---
+
 ## Live Dashboard
 
 After running the WanderBot demo with all five attack scenarios, the AgentLens dashboard surfaces both detection layers working on real data:
