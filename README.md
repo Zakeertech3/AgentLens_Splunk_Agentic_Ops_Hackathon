@@ -260,17 +260,6 @@ All config is loaded from `.env` via `pydantic_settings`:
 
 ---
 
-## Hackathon Context
-
-Built for the **Splunk Agentic Ops Hackathon** (May 2026).
-
-Targeting:
-- **Observability track** ($3,000)
-- **Best Use of Splunk Developer Tools** ($1,000)
-- **Best Use of MCP Server** ($1,000)
-
----
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
