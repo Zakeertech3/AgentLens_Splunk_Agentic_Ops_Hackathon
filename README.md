@@ -7,7 +7,19 @@
 **One-line observability for LLM agents. Catch prompt injection, hallucinations, and cost runaway before they reach production.**
 
 AgentLens is an open-source Python SDK that auto-instruments [CrewAI](https://github.com/joaomdmoura/crewAI) and [LangGraph](https://github.com/langchain-ai/langgraph) agents with a single line of code, streaming structured telemetry to Splunk via HEC. A companion Splunk app uses classical ML (Splunk AI Toolkit) to detect adversarial inputs and anomalous agent behavior in real time.
+---
 
+## The Problem
+
+Teams building with LLM agents fly blind. The standard observability stack (Splunk, Datadog, New Relic) was designed for traditional applications, not for non-deterministic agentic systems. Three pain points compound this gap:
+
+1. **Prompt injection is invisible.** When a user input causes an agent to ignore its instructions, there is no log line that says "hijacked." It looks like a normal LLM call.
+
+2. **Anomalies hide in plain text.** A 1500-token agent loop that burns through your API budget looks identical to a 500-token healthy call from the outside — both return 200 OK.
+
+3. **Multi-framework chaos.** Teams use CrewAI, LangGraph, OpenAI Agents SDK, and Anthropic SDK in the same codebase. Each has its own trace format. None of them speak to your existing SIEM.
+
+AgentLens closes the gap by sitting between the agent runtime and Splunk. One pip install. One line of code. Every agent call becomes a structured event your SOC or SRE team can query, alert on, and reason about.
 ---
 
 ## Architecture
@@ -59,7 +71,7 @@ See [docs/architecture.md](docs/architecture.md) for the full Mermaid diagram.
 ### 1. Install
 
 ```bash
-git clone https://github.com/<placeholder>/agentlens
+git clone https://github.com/Zakeertech3/AgentLens_Splunk_Agentic_Ops_Hackathon.git
 cd agentlens
 uv pip install -e .
 ```
