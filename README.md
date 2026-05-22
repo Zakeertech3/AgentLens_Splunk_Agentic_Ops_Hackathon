@@ -12,7 +12,7 @@ AgentLens is an open-source Python SDK that auto-instruments [CrewAI](https://gi
 
 ## Architecture
 
-![AgentLens Architecture](docs/architecture.png)
+<img width="4438" height="8192" alt="Image" src="https://github.com/user-attachments/assets/296dbc80-7475-4b4f-a394-a71667c91999" />
 
 ```
 Python App (CrewAI / LangGraph)
